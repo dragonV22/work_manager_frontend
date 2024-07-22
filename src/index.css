@@ -1,0 +1,90 @@
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+}
+a:hover {
+  color: #535bf2;
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #1a1a1a;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+button:hover {
+  border-color: #646cff;
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+tr,
+td,
+th{
+    border-collapse: collapse;
+    border: 1px solid #33333333;
+}
+td{
+  padding: 10px;
+}
+th{
+  background-color: #cf93e7;
+  padding: 10px;
+}
+input{
+  border: 1px solid #33333333;
+  padding: 3px;
+}
+:where(.css-dev-only-do-not-override-1qhpsh8).ant-btn-primary{
+  background-color: #1677ff;
+}
+
+
+
+*::-webkit-scrollbar {
+  width: 0.5rem;
+  height: 0.5rem;
+}
+
+*::-webkit-scrollbar-track {
+  --bg-opacity: 1;
+  background-color: #FBF1E5;
+}
+
+*::-webkit-scrollbar-thumb {
+  --bg-opacity: 1;
+  border-color: #573001;
+  background-color: #0008;
+  border-radius: 0.25rem;
+}
+
+*::-webkit-scrollbar-thumb {
+  border-radius: 0.25rem;
+}
+
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  a:hover {
+    color: #747bff;
+  }
+  button {
+    background-color: #f9f9f9;
+  }
+}
