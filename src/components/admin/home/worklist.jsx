@@ -19,6 +19,9 @@ import { db } from "../../../firebase";
 import PropTypes from "prop-types";
 import { getDaysInCurrentMonth } from "../../../utils/date";
 
+import { MdKeyboardArrowRight } from "react-icons/md";
+import { MdKeyboardArrowLeft } from "react-icons/md";
+
 const dayOfWeekMap = {
   Sun: "日",
   Mon: "月",
@@ -71,11 +74,16 @@ const WorkAdminList = (props) => {
 
   const [addStatus, setAddStatus] = useState("1");
   // date variable
+  const [date, setDate] = useState(new Date());
   const [month, setMonth] = useState(new Date().getMonth());
   const [year, setYear] = useState(new Date().getFullYear());
   const [daysInMonth, setDaysInMonth] = useState([]);
 
   const [isDaily, setIsDaily] = useState(false);
+  //add new status
+  const [pickup, setPickup] = useState(null);
+  const [delivery, setDelivery] = useState(null);
+  const [workDetails, setWorkDetails] = useState(null);
 
   // setting days in this month
   useEffect(() => {
@@ -196,6 +204,9 @@ const WorkAdminList = (props) => {
         setCharger(res.data.charger);
         setDeadline(res.data.deadline);
         setBudget(res.data.budget);
+        setPickup(res.data.pickup);
+        setDelivery(res.data.delivery);
+        setWorkDetails(res.data.work_details);
         setCarState(res.data.status);
         setUserName(res.data.user.name);
         setTitle(res.data.title);
@@ -229,6 +240,9 @@ const WorkAdminList = (props) => {
     if (charger) payload["charger"] = charger;
     if (budget) payload["budget"] = budget;
     if (title) payload["title"] = title;
+    if (pickup) payload["pickup"] = pickup;
+    if (delivery) payload["delivery"] = delivery;
+    if (workDetails) payload["work_details"] = workDetails;
     // original image file part
     if (estimateOriginalFile)
       payload["estimate_original_image_url"] = estimateOriginalFile;
@@ -257,6 +271,14 @@ const WorkAdminList = (props) => {
       });
 
     setIsEdit(true);
+  };
+
+  const handleDelete = () => {
+    try {
+      axiosTokenApi.delete(`/api/job/jobs/${jobId}/`);
+    } catch (error) {
+      console.error("There was an error deleting the job:", error);
+    }
   };
 
   const formatDayOfWeek = (date) => {
@@ -291,6 +313,22 @@ const WorkAdminList = (props) => {
 
   const handleYearChange = (e) => {
     setYear(parseInt(e.target.value));
+  };
+
+  const handlePrevDay = () => {
+    setDate((prevDate) => {
+      const newDate = new Date(prevDate);
+      newDate.setDate(newDate.getDate() - 1);
+      return newDate;
+    });
+  };
+
+  const handleNextDay = () => {
+    setDate((prevDate) => {
+      const newDate = new Date(prevDate);
+      newDate.setDate(newDate.getDate() + 1);
+      return newDate;
+    });
   };
 
   return (
@@ -411,42 +449,52 @@ const WorkAdminList = (props) => {
           </div>
         )}
         {!isDaily && (
-          <table className="w-[860px] lg:w-full table-fixed">
-            <thead>
-              <tr>
-                <th>車番号</th>
-                <th>顧客名</th>
-                <th>担当者名</th>
-                <th>ステータス</th>
-                <th>見積額</th>
-                <th>締切日</th>
-              </tr>
-            </thead>
-            <tbody>
-              {jobs.map((job, index) => (
-                <tr
-                  className="cursor-pointer"
-                  key={index}
+          <div className="w-[860px] lg:w-full flex flex-col box-border ">
+            <div className="w-full text-gray-100 bg-[#2596be]/60 h-10 flex justify-center items-center rounded-sm">
+              TODAY'S SCHEDULE
+            </div>
+            <div className="w-full px-6 border-b-[1px] flex justify-center">
+              <div className="flex items-center">
+                <MdKeyboardArrowLeft size={30} onClick={handlePrevDay} />
+              </div>
+              <div className="font-semibold text-2xl flex items-center tracking-wide">
+                {date.getMonth() + 1}月{date.getDate()}日(
+                {formatDayOfWeekToJapan(date)})
+              </div>
+              <div className="flex items-center">
+                <MdKeyboardArrowRight size={30} onClick={handleNextDay} />
+              </div>
+            </div>
+            <div className="flex flex-1 flex-col w-full">
+              {requestsByDeadline[
+                date.toLocaleDateString("en-US", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })
+              ]?.map((request, i) => (
+                <div
+                  key={i}
+                  className="w-full bg-red-200 m-2 p-2 cursor-pointer rounded-sm lg:rounded-md flex flex-row gap-x-4 items-center"
                   onClick={() => {
-                    openJobDetail(job.id);
+                    openJobDetail(request.id);
                   }}
                 >
-                  <td className="relative">
-                    {job.car_number}
-                    {job.isUnread && (
-                      <span className="absolute right-0 top-1 w-3 h-3 rounded-full bg-red-500"></span>
-                    )}
-                  </td>
-                  <td>{job.user.name}</td>
-                  <td>{job.charger}</td>
-                  {/* <td>{job.title}</td> */}
-                  <td>{STATUS_LIST[job.status - 1]}</td>
-                  <td>{job.budget}</td>
-                  <td>{job.deadline}</td>
-                </tr>
+                  <div className="w-1/12">{`no. ${i + 1}`}</div>
+                  <div className="w-1/6 whitespace-nowrap overflow-hidden text-ellipsis">{`担当者: ${request.charger}`}</div>
+                  <div className="w-1/6 whitespace-nowrap overflow-hidden text-ellipsis">{`顧客名: ${userName}`}</div>
+                  <div className="w-1/6 whitespace-nowrap overflow-hidden text-ellipsis">{`車名称: ${request.car_number}`}</div>
+                  <div className="w-1/6 whitespace-nowrap overflow-hidden text-ellipsis">{`作業内容: ${request.work_details}`}</div>
+                  {/* <div>{`見積もり: ${request.budget}`}</div> */}
+                  <div className="w-1/6 whitespace-nowrap overflow-hidden text-ellipsis">
+                    <div className="mb-1 whitespace-nowrap overflow-hidden text-ellipsis">{`引取: ${request.pickup}`}</div>
+                    <div className="whitespace-nowrap overflow-hidden text-ellipsis">{`納車: ${request.delivery}`}</div>
+                  </div>
+                  <div className="w-1/6 whitespace-nowrap overflow-hidden text-ellipsis">{`締切日: ${request.deadline}`}</div>
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+          </div>
         )}
       </div>
       <Transition.Root show={open} as={Fragment}>
@@ -573,6 +621,47 @@ const WorkAdminList = (props) => {
                               )}
                             </li>
                             <li className="flex">
+                              <p className="w-5/12">引取</p>
+                              {isEdit ? (
+                                <p>{pickup}</p>
+                              ) : (
+                                <input
+                                  type="text"
+                                  className=" w-6/12"
+                                  value={pickup}
+                                  onChange={(e) => setPickup(e.target.value)}
+                                />
+                              )}
+                            </li>
+                            <li className="flex">
+                              <p className="w-5/12">納車</p>
+                              {isEdit ? (
+                                <p>{delivery}</p>
+                              ) : (
+                                <input
+                                  type="text"
+                                  className=" w-6/12"
+                                  value={delivery}
+                                  onChange={(e) => setDelivery(e.target.value)}
+                                />
+                              )}
+                            </li>
+                            <li className="flex">
+                              <p className="w-5/12">作業内容</p>
+                              {isEdit ? (
+                                <p>{workDetails}</p>
+                              ) : (
+                                <input
+                                  type="text"
+                                  className=" w-6/12"
+                                  value={workDetails}
+                                  onChange={(e) =>
+                                    setWorkDetails(e.target.value)
+                                  }
+                                />
+                              )}
+                            </li>
+                            <li className="flex">
                               <p className="w-5/12">締切日</p>
                               {isEdit ? (
                                 <p>{deadline}</p>
@@ -585,6 +674,12 @@ const WorkAdminList = (props) => {
                                 />
                               )}
                             </li>
+                            <button
+                              className="absolute -top-14 right-24 mr-2 bg-[#1677ff] text-white text-lg p-1 px-3"
+                              onClick={handleDelete}
+                            >
+                              削除
+                            </button>
                             {isEdit ? (
                               <button
                                 className="absolute -top-14 right-8 bg-[#1677ff] text-white text-lg p-1 px-3"

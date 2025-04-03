@@ -1,7 +1,7 @@
 import axios from "axios";
 
-// const BASE_URL = "https://s-pro-auto-admin.com/";
-const BASE_URL = "http://127.0.0.1:8000";
+const BASE_URL = "https://s-pro-auto-admin.jp";
+// const BASE_URL = "http://127.0.0.1:8000";
 
 const axiosApi = axios.create({
   baseURL: BASE_URL,
